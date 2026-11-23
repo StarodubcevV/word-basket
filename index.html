@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Прогулка по мультяшному рынку. Слушайте названия фруктов и ягод по-английски и собирайте их в корзинку.">
+  <meta name="theme-color" content="#f7e8cc">
+  <title>Корзинка слов</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="fruits.js" defer></script>
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="top">
+      <div>
+        <p class="studio">Телестудия «ТВ-Развилка»</p>
+        <h1>Корзинка слов</h1>
+      </div>
+      <div class="score"><span>В корзинке</span><strong id="score">0 / 12</strong></div>
+    </header>
+    <nav id="zones" class="zones" aria-label="Ряды рынка"></nav>
+    <div class="market">
+      <svg id="market-scene" viewBox="0 0 1020 460" role="img" aria-labelledby="market-title">
+        <title id="market-title">Фруктовый сад</title>
+        <defs>
+          <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#f5e8c9"/><stop offset="1" stop-color="#e8ac8d"/></linearGradient>
+          <linearGradient id="path" x2="0" y2="1"><stop stop-color="#c79481"/><stop offset="1" stop-color="#ad7d73"/></linearGradient>
+          <pattern id="grain" width="61" height="47" patternUnits="userSpaceOnUse"><path d="M5 12h2m9 20h2m10-20h1m11 29h3m6-15h1m7-23h1" stroke="#fff1c7" stroke-width="1.7" stroke-linecap="round" opacity=".22"/></pattern>
+          <g id="fruit-art"></g>
+        </defs>
+        <path d="M0 0h1020v460H0Z" fill="url(#sky)"/>
+        <circle cx="835" cy="82" r="49" fill="#fff0b7" opacity=".9"/>
+        <path d="M4 141c109-64 197-53 299 11 103-64 207-64 350 17 142-79 266-68 367-9v165H0Z" fill="#b5a08f"/>
+        <path d="M0 197q178-45 302-17t259 22 259-30 200 37v117H0Z" fill="#918f79"/>
+        <path d="M0 281q155-34 315-17t340-5q179-25 365 14v89H0Z" fill="#9a8b73"/>
+        <path d="M0 314q232-15 510 0t510 2v144H0Z" fill="url(#path)"/>
+        <path d="M0 320q268 15 510 5t510-3M31 407h86m31 15h62m340-17h81m170-66h127m-741 20h62m615 61h152m-708 18h43" stroke="#ab786d" stroke-width="3" opacity=".62" fill="none" stroke-linecap="round"/>
+        <path d="M106 62q27-8 61 0m31 1h24m304 14h51m18-5 46-3" fill="none" stroke="#fff2ce" stroke-width="5" opacity=".65" stroke-linecap="round"/>
+        <path d="M0 0h1020v460H0Z" fill="url(#grain)"/>
+        <g id="market-stalls"></g>
+        <g aria-hidden="true" stroke="#4d3845" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 329v-61m43 58v-61m-45 33h49" fill="none"/>
+          <path d="M14 263h53v14H14Z" fill="#c09370"/>
+          <path d="M934 331q-12-25-10-46m22 45q11-18 25-26m-28 26q-4-40 14-64" fill="none" stroke="#7c895d"/>
+          <path d="M918 324h54l-8 41h-37Z" fill="#be8067"/>
+          <path d="M914 321h60v11h-60Z" fill="#d99d77"/>
+        </g>
+        <g id="girl" transform="translate(128 390)" aria-hidden="true">
+          <ellipse cy="1" rx="32" ry="6" fill="#513848" opacity=".33"/>
+          <g id="girl-rig" stroke="#4b3644" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+            <g id="girl-back-leg" transform="translate(8 -38)">
+              <path d="M-7 0h13l-1 33H-6Z" fill="#f1b98e"/>
+              <path d="M-7 29H6v4l7 1q6 1 5 6H-7Z" fill="#76556c"/>
+            </g>
+            <g id="girl-front-leg" transform="translate(-8 -38)">
+              <path d="M-7 0H6L5 33H-6Z" fill="#f3c49b"/>
+              <path d="M-7 29H6v4l8 1q6 2 5 6H-7Z" fill="#835c73"/>
+            </g>
+            <path d="M-14-78q14-8 28 0l5 22 7 19q-23 10-50 0l7-20Z" fill="#b97682"/>
+            <path d="M-15-76l9-4 6 14 8-14 9 5m-32 32q14 3 30-1" fill="none" stroke="#e2a8a0" stroke-width="2.4"/>
+            <path d="M-6-88h12v12q-6 5-12 0Z" fill="#e9aa83"/>
+            <path d="M-21-103q-14-6-18 10-4 12 2 20 18 3 19-29Z" fill="#724c4a"/>
+            <path d="M-25-100q-10-15 7-29 16-13 34 0 9 7 9 21l7 6-8 6q-5 13-19 16-21 0-27-16Z" fill="#f2bd92"/>
+            <path d="M-24-96q-12-24 8-36 17-11 34 3 5 4 7 12-16 2-25-9-1 10-11 13l-2 14q-7-10-11 3Z" fill="#775052"/>
+            <path d="M-26-107l-11-9-2 12 13 2 10-5-5 12Z" fill="#d18d9a"/>
+            <circle cx="15" cy="-108" r="2.4" fill="#4b3644" stroke="none"/>
+            <circle cx="11" cy="-100" r="4.8" fill="#dd847e" stroke="none"/>
+            <path d="M14-94q6 3 10-2" fill="none" stroke-width="2"/>
+            <g id="girl-arm" transform="translate(13 -73)">
+              <path d="M-5-3q5-5 10-1l9 19-8 5L-5 5Z" fill="#ce8c92"/>
+              <path d="M6 19l7-5 5 6q2 5-3 7-3 2-6-2Z" fill="#f2bd92"/>
+              <path d="M11 40q0-19 13-19t14 19" fill="none" stroke="#966645"/>
+              <path d="M8 39h34l-5 17H13Z" fill="#cb9b60"/>
+              <path d="M11 44h29m-27 6h25m-20-10 2 15m12-15-1 15" fill="none" stroke="#986d50" stroke-width="1.5"/>
+              <g id="girl-basket-fruit"></g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="controls">
+      <p id="hint" role="status">Подойди к прилавку, используя стрелки.</p>
+      <div class="actions" aria-label="Управление">
+        <div class="directions">
+          <button class="direction" data-key="ArrowUp" type="button" aria-label="Следующий ряд">↑</button>
+          <button class="direction" data-key="ArrowLeft" type="button" aria-label="Влево">←</button>
+          <button class="direction" data-key="ArrowDown" type="button" aria-label="Предыдущий ряд">↓</button>
+          <button class="direction" data-key="ArrowRight" type="button" aria-label="Вправо">→</button>
+        </div>
+        <button id="look" class="primary look" type="button" disabled>Посмотреть</button>
+      </div>
+    </div>
+    <section class="basket" aria-labelledby="basket-heading">
+      <h2 id="basket-heading">Моя корзинка</h2>
+      <p id="empty-basket">Подойди к прилавку, послушай слово и попроси фрукт по-английски.</p>
+      <ul id="basket-items"></ul>
+      <p id="complete" class="complete" role="status" hidden>Корзинка полна! Ты собрала все фрукты и ягоды. <button id="replay" type="button">Сыграть ещё раз</button></p>
+    </section>
+  </main>
+
+  <dialog id="card" class="card" aria-labelledby="fruit-english">
+    <button id="close-card" class="close-card" type="button" aria-label="Закрыть карточку">×</button>
+    <div id="picture" class="picture">
+      <svg viewBox="0 0 210 180" role="img"><title id="fruit-picture-title"></title>
+        <ellipse cx="105" cy="150" rx="60" ry="9" fill="#7a544c" opacity=".12"/>
+        <g id="big-fruit" transform="translate(32 7) scale(1.45)"></g>
+      </svg>
+    </div>
+    <div class="card-content">
+      <h2 id="fruit-english" lang="en"></h2>
+      <p id="fruit-russian" class="translation"></p>
+      <button id="hear-word" type="button">Послушать слово</button>
+      <div class="phrase">
+        <p id="fruit-phrase" lang="en"></p>
+        <button id="hear-phrase" type="button">Послушать фразу</button>
+      </div>
+      <div class="card-actions">
+        <button id="say" class="primary" type="button" hidden>Сказать в микрофон</button>
+        <button id="take" class="primary" type="button">Я повторила · взять</button>
+      </div>
+      <p id="speech-status" class="speech-status" role="status"></p>
+    </div>
+  </dialog>
+  <audio id="voice" preload="none"></audio>
+</body>
+</html>
