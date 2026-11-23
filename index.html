@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Прогулка по мультяшному рынку. Слушайте названия фруктов и ягод по-английски и собирайте их в корзинку.">
+  <meta name="description" content="Walk around a cartoon market and practise asking for fruit in English.">
   <meta name="theme-color" content="#f7e8cc">
-  <title>Корзинка слов</title>
+  <title>Word Basket</title>
   <link rel="stylesheet" href="style.css">
   <script src="fruits.js" defer></script>
   <script src="game.js" defer></script>
@@ -14,15 +14,15 @@
   <main>
     <header class="top">
       <div>
-        <p class="studio">Телестудия «ТВ-Развилка»</p>
-        <h1>Корзинка слов</h1>
+        <p class="studio">TV-Razvilka Studio</p>
+        <h1>Word Basket</h1>
       </div>
-      <div class="score"><span>В корзинке</span><strong id="score">0 / 12</strong></div>
+      <div class="score"><span>Fruit types collected</span><strong id="score">0 / 12</strong></div>
     </header>
-    <nav id="zones" class="zones" aria-label="Ряды рынка"></nav>
+    <ol id="zones" class="zones" aria-label="Market rows"></ol>
     <div class="market">
       <svg id="market-scene" viewBox="0 0 1020 460" role="img" aria-labelledby="market-title">
-        <title id="market-title">Фруктовый сад</title>
+        <title id="market-title">Orchard</title>
         <defs>
           <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#f5e8c9"/><stop offset="1" stop-color="#e8ac8d"/></linearGradient>
           <linearGradient id="path" x2="0" y2="1"><stop stop-color="#c79481"/><stop offset="1" stop-color="#ad7d73"/></linearGradient>
@@ -39,6 +39,12 @@
         <path d="M106 62q27-8 61 0m31 1h24m304 14h51m18-5 46-3" fill="none" stroke="#fff2ce" stroke-width="5" opacity=".65" stroke-linecap="round"/>
         <path d="M0 0h1020v460H0Z" fill="url(#grain)"/>
         <g id="market-stalls"></g>
+        <g aria-hidden="true">
+          <ellipse id="row-exit-mark" cx="945" cy="393" rx="60" ry="14" fill="#ffe19f" opacity="0"/>
+          <path d="M948 238v81" stroke="#674a4e" stroke-width="9" stroke-linecap="round"/>
+          <path d="M884 207h101l24 23-24 23H884Z" fill="#f9d591" stroke="#62464c" stroke-width="4" stroke-linejoin="round"/>
+          <text x="938" y="236" text-anchor="middle" font-family="system-ui,sans-serif" font-size="23" font-weight="800" fill="#503846">ROWS</text>
+        </g>
         <g aria-hidden="true" stroke="#4d3845" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 329v-61m43 58v-61m-45 33h49" fill="none"/>
           <path d="M14 263h53v14H14Z" fill="#c09370"/>
@@ -60,9 +66,10 @@
             <path d="M-14-78q14-8 28 0l5 22 7 19q-23 10-50 0l7-20Z" fill="#b97682"/>
             <path d="M-15-76l9-4 6 14 8-14 9 5m-32 32q14 3 30-1" fill="none" stroke="#e2a8a0" stroke-width="2.4"/>
             <path d="M-6-88h12v12q-6 5-12 0Z" fill="#e9aa83"/>
-            <path d="M-21-103q-14-6-18 10-4 12 2 20 18 3 19-29Z" fill="#724c4a"/>
+            <path d="M-21-103q-14-6-18 10-4 12 2 20 18 3 19-29Z" fill="#ddaa68"/>
             <path d="M-25-100q-10-15 7-29 16-13 34 0 9 7 9 21l7 6-8 6q-5 13-19 16-21 0-27-16Z" fill="#f2bd92"/>
-            <path d="M-24-96q-12-24 8-36 17-11 34 3 5 4 7 12-16 2-25-9-1 10-11 13l-2 14q-7-10-11 3Z" fill="#775052"/>
+            <path d="M-24-96q-12-24 8-36 17-11 34 3 5 4 7 12-16 2-25-9-1 10-11 13l-2 14q-7-10-11 3Z" fill="#f1ca85"/>
+            <path d="M-19-122q4-10 13-11m-25 39q-4 7-3 13" fill="none" stroke="#f9df9b" stroke-width="2"/>
             <path d="M-26-107l-11-9-2 12 13 2 10-5-5 12Z" fill="#d18d9a"/>
             <circle cx="15" cy="-108" r="2.4" fill="#4b3644" stroke="none"/>
             <circle cx="11" cy="-100" r="4.8" fill="#dd847e" stroke="none"/>
@@ -80,44 +87,46 @@
       </svg>
     </div>
     <div class="controls">
-      <p id="hint" role="status">Подойди к прилавку, используя стрелки.</p>
-      <div class="actions" aria-label="Управление">
+      <p id="hint" role="status">Use the arrows to walk to a stall.</p>
+      <div class="actions" aria-label="Game controls">
         <div class="directions">
-          <button class="direction" data-key="ArrowUp" type="button" aria-label="Следующий ряд">↑</button>
-          <button class="direction" data-key="ArrowLeft" type="button" aria-label="Влево">←</button>
-          <button class="direction" data-key="ArrowDown" type="button" aria-label="Предыдущий ряд">↓</button>
-          <button class="direction" data-key="ArrowRight" type="button" aria-label="Вправо">→</button>
+          <button class="direction" data-key="ArrowUp" type="button" aria-label="Next row">↑</button>
+          <button class="direction" data-key="ArrowLeft" type="button" aria-label="Walk left">←</button>
+          <button class="direction" data-key="ArrowDown" type="button" aria-label="Previous row">↓</button>
+          <button class="direction" data-key="ArrowRight" type="button" aria-label="Walk right">→</button>
         </div>
-        <button id="look" class="primary look" type="button" disabled>Посмотреть</button>
+        <button id="look" class="primary look" type="button" disabled>Look</button>
       </div>
     </div>
     <section class="basket" aria-labelledby="basket-heading">
-      <h2 id="basket-heading">Моя корзинка</h2>
-      <p id="empty-basket">Подойди к прилавку, послушай слово и попроси фрукт по-английски.</p>
+      <h2 id="basket-heading">My Basket</h2>
+      <p id="empty-basket">You are the shopper. A grown-up can be the seller. Ask for the fruit, then say thank you.</p>
       <ul id="basket-items"></ul>
-      <p id="complete" class="complete" role="status" hidden>Корзинка полна! Ты собрала все фрукты и ягоды. <button id="replay" type="button">Сыграть ещё раз</button></p>
+      <p id="complete" class="complete" role="status" hidden>Your basket is full! You collected every kind of fruit. <button id="replay" type="button">Play again</button></p>
     </section>
   </main>
 
   <dialog id="card" class="card" aria-labelledby="fruit-english">
-    <button id="close-card" class="close-card" type="button" aria-label="Закрыть карточку">×</button>
+    <button id="close-card" class="close-card" type="button" aria-label="Close fruit card">×</button>
     <div id="picture" class="picture">
       <svg viewBox="0 0 210 180" role="img"><title id="fruit-picture-title"></title>
         <ellipse cx="105" cy="150" rx="60" ry="9" fill="#7a544c" opacity=".12"/>
         <g id="big-fruit" transform="translate(32 7) scale(1.45)"></g>
       </svg>
+      <div id="fruit-serving" class="fruit-serving" aria-hidden="true" hidden></div>
     </div>
     <div class="card-content">
       <h2 id="fruit-english" lang="en"></h2>
-      <p id="fruit-russian" class="translation"></p>
-      <button id="hear-word" type="button">Послушать слово</button>
+      <p id="fruit-quantity" class="translation"></p>
+      <button id="hear-word" type="button">Hear the word</button>
       <div class="phrase">
-        <p id="fruit-phrase" lang="en"></p>
-        <button id="hear-phrase" type="button">Послушать фразу</button>
+        <p id="fruit-turn" class="turn"></p>
+        <p id="fruit-phrase"></p>
+        <button id="hear-phrase" type="button">Hear the line</button>
       </div>
       <div class="card-actions">
-        <button id="say" class="primary" type="button" hidden>Сказать в микрофон</button>
-        <button id="take" class="primary" type="button">Я повторила · взять</button>
+        <button id="say" class="primary" type="button" hidden>Speak</button>
+        <button id="take" class="primary" type="button">I said it</button>
       </div>
       <p id="speech-status" class="speech-status" role="status"></p>
     </div>

@@ -37,9 +37,9 @@ button:focus-visible { outline: 3px solid var(--accent-dark); outline-offset: 2p
 button:disabled { opacity: .52; cursor: default; }
 .primary { background: var(--accent); color: #fff5e1; border-color: var(--accent-dark); }
 .primary:hover { background: var(--accent-dark); }
-.zones { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.zones button { min-height: 39px; padding: 5px 10px; font-size: .875rem; }
-.zones button[aria-current="true"] { background: #586e5d; border-color: #485b4d; color: #fff3dd; }
+.zones { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; padding: 0; list-style: none; }
+.zones li { padding: 6px 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--paper); font-size: .875rem; }
+.zones li[aria-current="true"] { background: #586e5d; border-color: #485b4d; color: #fff3dd; font-weight: 800; }
 .market { border: 1px solid #ab8175; border-radius: 14px; overflow: hidden; background: #e1ba99; box-shadow: 0 8px 26px #6f536018; }
 svg { display: block; width: 100%; height: auto; }
 .controls { justify-content: space-between; margin: 10px 0 13px; }
@@ -65,16 +65,18 @@ svg { display: block; width: 100%; height: auto; }
 .card[open] { display: grid; grid-template-columns: minmax(0, .86fr) minmax(0, 1fr); align-items: center; gap: 18px; }
 .card::backdrop { background: #442f43a8; }
 .close-card { position: absolute; top: 8px; right: 8px; min-width: 44px; padding: 2px; font-size: 1.5rem; z-index: 1; }
-.picture { align-self: stretch; display: grid; place-items: center; border: 1px solid #d7b19e; border-radius: 11px; background: #f9dfb4; }
-.picture svg { max-width: 265px; }
+.picture { align-self: stretch; display: flex; align-items: center; justify-content: center; flex-direction: column; border: 1px solid #d7b19e; border-radius: 11px; background: #f9dfb4; }
+.picture > svg { max-width: 265px; }
+.fruit-serving { display: flex; justify-content: center; gap: 4px; padding: 3px 8px; margin-bottom: 8px; border-radius: 8px; background: #fff3ddcc; }
+.fruit-serving svg { width: 30px; height: 30px; }
 .card h2 { margin: 0; padding-right: 35px; font: 700 clamp(2rem, 6vw, 3.15rem)/1 Georgia, serif; }
 .translation { margin: 4px 0 9px; color: var(--muted); }
 .phrase { margin: 11px 0; padding: 8px 10px; background: #f8dfbc; border-radius: 8px; }
 .phrase p { margin: 0 0 5px; font-weight: 800; font-size: 1.13rem; }
+.phrase .turn { color: var(--muted); font-size: .875rem; }
 .speech-status { min-height: 1.35em; margin: 6px 0 0; color: var(--muted); font-size: .875rem; }
 @media (max-width: 700px), (pointer: coarse) {
   main { width: calc(100% - 20px); padding-top: 12px; }
-  .zones button { min-height: 40px; }
   .controls { display: grid; gap: 8px; }
   .actions { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; }
   .directions { --key-size: clamp(47px, 15vw, 62px); display: grid; grid-template-columns: repeat(3, var(--key-size)); grid-template-areas: ". up ." "left down right"; gap: 5px; }
@@ -87,7 +89,7 @@ svg { display: block; width: 100%; height: auto; }
 }
 @media (max-width: 530px) {
   .card[open] { grid-template-columns: 1fr; gap: 10px; }
-  .picture svg { max-height: min(165px, 26dvh); }
+  .picture > svg { max-height: min(165px, 26dvh); }
   .card h2 { padding-right: 0; }
   .card-actions { gap: 5px; }
 }

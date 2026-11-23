@@ -1,29 +1,45 @@
 const fruitZones = [
-  {name: 'Фруктовый сад', colors: ['#6f8b6b', '#f4d7a4'], fruits: [
-    {id: 'apple', russian: 'Яблоко', english: 'Apple', phrase: 'An apple, please.', color: '#c95d54'},
-    {id: 'pear', russian: 'Груша', english: 'Pear', phrase: 'A pear, please.', color: '#809c5a'}
+  {name: 'Orchard', colors: ['#6f8b6b', '#f4d7a4'], fruits: [
+    {id: 'apple', english: 'Apple', plural: 'apples', quantity: 2, shade: 'red', color: '#c95d54'},
+    {id: 'pear', english: 'Pear', plural: 'pears', quantity: 3, shade: 'green', color: '#809c5a'}
   ]},
-  {name: 'Цитрусовый ряд', colors: ['#c37658', '#f7d899'], fruits: [
-    {id: 'orange', russian: 'Апельсин', english: 'Orange', phrase: 'An orange, please.', color: '#e88842'},
-    {id: 'lemon', russian: 'Лимон', english: 'Lemon', phrase: 'A lemon, please.', color: '#d6a93e'}
+  {name: 'Citrus', colors: ['#c37658', '#f7d899'], fruits: [
+    {id: 'orange', english: 'Orange', plural: 'oranges', quantity: 2, shade: 'orange', color: '#e88842'},
+    {id: 'lemon', english: 'Lemon', plural: 'lemons', quantity: 3, shade: 'yellow', color: '#d6a93e'}
   ]},
-  {name: 'Южные фрукты', colors: ['#6b927f', '#f6ddae'], fruits: [
-    {id: 'banana', russian: 'Банан', english: 'Banana', phrase: 'A banana, please.', color: '#d2a948'},
-    {id: 'peach', russian: 'Персик', english: 'Peach', phrase: 'A peach, please.', color: '#e27b61'}
+  {name: 'Baskets of Fruit', colors: ['#6b927f', '#f6ddae'], fruits: [
+    {id: 'banana', english: 'Banana', plural: 'bananas', quantity: 2, shade: 'yellow', color: '#d2a948'},
+    {id: 'peach', english: 'Peach', plural: 'peaches', quantity: 1, shade: 'pink', color: '#e27b61'}
   ]},
-  {name: 'Ягодный ряд', colors: ['#a66574', '#f6cf9d'], fruits: [
-    {id: 'strawberry', russian: 'Клубника', english: 'Strawberry', phrase: 'A strawberry, please.', color: '#c95860'},
-    {id: 'raspberry', russian: 'Малина', english: 'Raspberry', phrase: 'A raspberry, please.', color: '#bb5378'}
+  {name: 'Berries', colors: ['#a66574', '#f6cf9d'], fruits: [
+    {id: 'strawberry', english: 'Strawberry', plural: 'strawberries', quantity: 3, shade: 'red', color: '#c95860'},
+    {id: 'raspberry', english: 'Raspberry', plural: 'raspberries', quantity: 2, shade: 'pink', color: '#bb5378'}
   ]},
-  {name: 'Грозди и вишни', colors: ['#7a6991', '#f4d6a9'], fruits: [
-    {id: 'grapes', russian: 'Виноград', english: 'Grapes', phrase: 'Some grapes, please.', color: '#8163a3'},
-    {id: 'cherries', russian: 'Вишня', english: 'Cherries', phrase: 'Some cherries, please.', color: '#b95263'}
+  {name: 'Grapes & Cherries', colors: ['#7a6991', '#f4d6a9'], fruits: [
+    {id: 'grapes', english: 'Grapes', plural: 'grapes', quantity: 3, shade: 'purple', color: '#8163a3'},
+    {id: 'cherries', english: 'Cherries', plural: 'cherries', quantity: 2, shade: 'red', color: '#b95263'}
   ]},
-  {name: 'Бахча', colors: ['#729064', '#f6d39a'], fruits: [
-    {id: 'watermelon', russian: 'Арбуз', english: 'Watermelon', phrase: 'A watermelon, please.', color: '#72945f'},
-    {id: 'melon', russian: 'Дыня', english: 'Melon', phrase: 'A melon, please.', color: '#d6984e'}
+  {name: 'Melons', colors: ['#729064', '#f6d39a'], fruits: [
+    {id: 'watermelon', english: 'Watermelon', plural: 'watermelons', quantity: 1, shade: 'green', color: '#72945f'},
+    {id: 'melon', english: 'Melon', plural: 'melons', quantity: 1, shade: 'yellow', color: '#d6984e'}
   ]},
 ];
+
+const numberWords = ['', 'one', 'two', 'three'];
+
+function orderText(fruit) {
+  const noun = fruit.quantity === 1 ? fruit.english.toLowerCase() : fruit.plural;
+  const order = `${numberWords[fruit.quantity]} ${fruit.shade} ${noun}`;
+  return order[0].toUpperCase() + order.slice(1);
+}
+
+function fruitRequest(fruit) {
+  return `${orderText(fruit)}, please.`;
+}
+
+function sellerReply(fruit) {
+  return `Here you are. ${orderText(fruit)}.`;
+}
 
 const fruitArt = {
   apple: `<path d="M51 35c-12-12-28-7-34 5-7 14 3 39 16 45 6 3 12-3 18-3s11 6 17 3c13-6 22-32 15-45-6-12-22-16-32-5Z" fill="#d86155"/>

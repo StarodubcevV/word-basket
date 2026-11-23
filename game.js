@@ -1,5 +1,6 @@
 const byId = (id) => document.getElementById(id);
 const stalls = [306, 714];
+const rowExit = 894;
 const allFruits = fruitZones.flatMap((zone) => zone.fruits);
 const collected = new Set();
 const held = new Set();
@@ -11,6 +12,7 @@ const say = byId('say');
 const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognizer = null;
 let selectedFruit = null;
+let dialogueStage = 'phrase';
 let zoneIndex = 0;
 let x = 128;
 let face = 1;
@@ -28,16 +30,11 @@ byId('fruit-art').innerHTML = allFruits.map((fruit) =>
   `<g id="fruit-${fruit.id}" stroke="#4b3644" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round">${fruitArt[fruit.id]}</g>`
 ).join('');
 
-const zoneButtons = fruitZones.map((zone, index) => {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.textContent = zone.name;
-  button.addEventListener('click', (event) => {
-    chooseZone(index);
-    if (event.detail > 0) button.blur();
-  });
-  byId('zones').append(button);
-  return button;
+const zoneLabels = fruitZones.map((zone) => {
+  const label = document.createElement('li');
+  label.textContent = zone.name;
+  byId('zones').append(label);
+  return label;
 });
 
 function stallMarkup(fruit, index, colors) {
@@ -58,18 +55,16 @@ function stallMarkup(fruit, index, colors) {
     <path d="M-120 278h240v50h-240Z" fill="#c79a72"/>
     <path d="M-118 294h236m-236 14h236m-236 13h236" fill="none" stroke="#a67861" stroke-width="2.6"/>
     <rect x="-106" y="279" width="212" height="42" rx="6" fill="#f5d5a2" stroke-width="3"/>
-    <text x="0" y="308" font-family="system-ui,sans-serif" font-size="26" font-weight="800" text-anchor="middle" fill="#523944" stroke="none">${fruit.russian}</text>
+    <text x="0" y="308" font-family="system-ui,sans-serif" font-size="26" font-weight="800" text-anchor="middle" fill="#523944" stroke="none">${fruit.english}</text>
     <path d="M-121 327v13m240-13v13" fill="none" stroke="#634754" stroke-linecap="round"/>
   </g>`;
 }
 
 function renderZone() {
   const zone = fruitZones[zoneIndex];
-  byId('market-title').textContent = `${zone.name}. Прилавки: ${zone.fruits.map((fruit) => fruit.russian).join(' и ')}.`;
+  byId('market-title').textContent = `${zone.name}. Stalls: ${zone.fruits.map((fruit) => fruit.english).join(' and ')}.`;
   byId('market-stalls').innerHTML = zone.fruits.map((fruit, i) => stallMarkup(fruit, i, zone.colors)).join('');
-  zoneButtons.forEach((button, i) => button.setAttribute('aria-current', String(i === zoneIndex)));
-  byId('zones').querySelector('[aria-current="true"]').setAttribute('aria-label', `${zone.name}, текущий ряд рынка`);
-  zoneButtons.forEach((button, i) => { if (i !== zoneIndex) button.removeAttribute('aria-label'); });
+  zoneLabels.forEach((label, i) => label.setAttribute('aria-current', String(i === zoneIndex)));
   document.querySelector('[data-key="ArrowDown"]').disabled = zoneIndex === 0;
   document.querySelector('[data-key="ArrowUp"]').disabled = zoneIndex === fruitZones.length - 1;
   updateNearby(performance.now());
@@ -87,12 +82,21 @@ function chooseZone(index) {
 
 function updateNearby(now) {
   const index = inRange();
+  const atExit = x >= rowExit;
+  byId('row-exit-mark').setAttribute('opacity', atExit ? '.72' : '0');
   for (let i = 0; i < stalls.length; i++) byId(`mark-${i}`).setAttribute('opacity', i === index ? '.65' : '0');
   look.disabled = index < 0;
-  const nextText = now < announcementUntil ? announcement :
-    index < 0 ? '← → идти по рынку · ↑ ↓ сменить ряд' :
-      `${fruitZones[zoneIndex].fruits[index].russian} · пробел или кнопка «Посмотреть»`;
+  const rowHint = zoneIndex === 0 ? '↑ next row' : zoneIndex === fruitZones.length - 1 ? '↓ previous row' : '↑ next row · ↓ previous row';
+  const nextText = now < announcementUntil ? announcement : atExit ? rowHint :
+    index < 0 ? '← → walk · Change rows at the far right' :
+      `${fruitZones[zoneIndex].fruits[index].english} · Space or Look`;
   if (hint.textContent !== nextText) hint.textContent = nextText;
+}
+
+function announce(text) {
+  announcement = text;
+  announcementUntil = performance.now() + 2600;
+  updateNearby(performance.now());
 }
 
 function stopVoice() {
@@ -106,11 +110,12 @@ function speak(variant) {
   const fruit = selectedFruit;
   stopVoice();
   const request = voiceRequest;
-  voice.src = `audio/${fruit.id}-${variant}.mp3`;
+  voice.src = variant === 'thanks' ? 'audio/thank-you.mp3' : `audio/${fruit.id}-${variant}.mp3`;
   voice.play().catch(() => {
     if (!card.open || request !== voiceRequest || !voice.paused) return;
     if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(variant === 'word' ? fruit.english : fruit.phrase);
+      const line = variant === 'word' ? fruit.english : dialogueLine(variant, fruit);
+      const utterance = new SpeechSynthesisUtterance(line);
       utterance.lang = 'en-US';
       utterance.rate = .85;
       window.speechSynthesis.speak(utterance);
@@ -118,23 +123,44 @@ function speak(variant) {
   });
 }
 
+function dialogueLine(stage, fruit) {
+  if (stage === 'seller') return sellerReply(fruit);
+  if (stage === 'thanks') return 'Thank you!';
+  return fruitRequest(fruit);
+}
+
+function renderDialogue() {
+  const labels = {
+    phrase: ['Shopper · Ask for the fruit', 'I said it'],
+    seller: ['Seller · Hand over the fruit', 'Fruit handed over'],
+    thanks: ['Shopper · Say thank you', 'I said thank you · Take'],
+  };
+  const [turn, buttonLabel] = labels[dialogueStage];
+  byId('fruit-turn').textContent = turn;
+  byId('fruit-phrase').textContent = dialogueLine(dialogueStage, selectedFruit);
+  const serving = byId('fruit-serving');
+  serving.hidden = dialogueStage === 'phrase';
+  serving.innerHTML = serving.hidden ? '' : Array.from({length: selectedFruit.quantity}, () =>
+    `<svg viewBox="0 0 100 100">${fruitUse(selectedFruit)}</svg>`
+  ).join('');
+  byId('take').textContent = buttonLabel;
+  say.hidden = dialogueStage === 'seller' || !Recognition || !window.isSecureContext;
+  say.disabled = false;
+  byId('speech-status').textContent = '';
+}
+
 function openFruit() {
   const index = inRange();
   if (index < 0 || card.open) return;
   stopListening();
   selectedFruit = fruitZones[zoneIndex].fruits[index];
+  dialogueStage = 'phrase';
   byId('fruit-english').textContent = selectedFruit.english;
-  byId('fruit-russian').textContent = selectedFruit.russian;
-  byId('fruit-phrase').textContent = selectedFruit.phrase;
-  byId('fruit-picture-title').textContent = selectedFruit.russian;
+  byId('fruit-quantity').textContent = orderText(selectedFruit);
+  byId('fruit-picture-title').textContent = orderText(selectedFruit);
   byId('big-fruit').innerHTML = fruitUse(selectedFruit);
   byId('picture').style.backgroundColor = `${selectedFruit.color}27`;
-  const owned = collected.has(selectedFruit.id);
-  byId('take').textContent = owned ? 'Уже в корзинке' : 'Я повторила · взять';
-  byId('take').disabled = owned;
-  say.hidden = owned || !Recognition || !window.isSecureContext;
-  say.disabled = false;
-  byId('speech-status').textContent = '';
+  renderDialogue();
   held.clear();
   card.showModal();
   speak('word');
@@ -144,7 +170,7 @@ function renderBasket() {
   byId('score').textContent = `${collected.size} / ${allFruits.length}`;
   byId('empty-basket').hidden = collected.size > 0;
   byId('basket-items').innerHTML = allFruits.filter((fruit) => collected.has(fruit.id)).map((fruit) =>
-    `<li><svg viewBox="0 0 100 100" aria-hidden="true">${fruitUse(fruit)}</svg><span lang="en">${fruit.english}</span></li>`
+    `<li><svg viewBox="0 0 100 100" aria-hidden="true">${fruitUse(fruit)}</svg><span>${orderText(fruit)}</span></li>`
   ).join('');
   const last = allFruits.find((fruit) => fruit.id === [...collected].at(-1));
   byId('girl-basket-fruit').innerHTML = last ? `<g transform="translate(15 36) scale(.17)">${fruitUse(last)}</g>` : '';
@@ -152,27 +178,34 @@ function renderBasket() {
 }
 
 function takeFruit() {
-  if (!selectedFruit || collected.has(selectedFruit.id)) return;
+  if (!selectedFruit || !card.open) return;
   const fruit = selectedFruit;
+  const alreadyOwned = collected.has(fruit.id);
   collected.add(fruit.id);
   renderBasket();
-  announcement = `${fruit.russian} в корзинке!`;
-  announcementUntil = performance.now() + 2600;
+  announce(alreadyOwned ? 'Nice practice! This fruit is already in your basket.' : `${orderText(fruit)} added to your basket!`);
   card.close();
 }
 
+function advanceDialogue() {
+  if (!selectedFruit || !card.open) return;
+  stopListening();
+  if (dialogueStage === 'thanks') {
+    takeFruit();
+    return;
+  }
+  dialogueStage = dialogueStage === 'phrase' ? 'seller' : 'thanks';
+  renderDialogue();
+  speak(dialogueStage);
+  byId('take').focus();
+}
+
 function matchesPhrase(transcript, fruit) {
-  const words = transcript.toLowerCase().match(/[a-z]+/g) ?? [];
-  const accepted = {
-    cherries: ['cherry', 'cherries'],
-    grapes: ['grape', 'grapes'],
-    strawberry: ['strawberry', 'strawberries'],
-    raspberry: ['raspberry', 'raspberries'],
-    peach: ['peach', 'peaches'],
-  };
-  const names = accepted[fruit.id] ?? [fruit.id, `${fruit.id}s`];
-  const product = names.some((name) => words.includes(name)) || (fruit.id === 'watermelon' && words.join(' ').includes('water melon'));
-  return product && words.includes('please');
+  const words = transcript.toLowerCase().match(/[a-z]+|[0-9]+/g) ?? [];
+  const noun = fruit.quantity === 1 ? fruit.english.toLowerCase() : fruit.plural;
+  const product = words.includes(noun) || (fruit.id === 'watermelon' && words.join(' ').includes('water melon'));
+  const quantity = words.includes(String(fruit.quantity)) || words.includes(numberWords[fruit.quantity]);
+  return product && quantity && words.includes(fruit.shade) && words.includes('please');
 }
 
 function listenForFruit() {
@@ -180,20 +213,23 @@ function listenForFruit() {
   stopVoice();
   const listener = new Recognition();
   const fruit = selectedFruit;
+  const stage = dialogueStage;
   const speechStatus = byId('speech-status');
   listener.lang = 'en-US';
   listener.maxAlternatives = 3;
   say.disabled = true;
-  speechStatus.textContent = 'Говори фразу по-английски.';
+  speechStatus.textContent = 'Say the line in English.';
   recognizer = listener;
   listener.onresult = (event) => {
     if (recognizer !== listener || selectedFruit !== fruit) return;
     const alternatives = Array.from(event.results[0], (result) => result.transcript);
-    if (alternatives.some((transcript) => matchesPhrase(transcript, fruit))) takeFruit();
-    else speechStatus.textContent = 'Попробуй ещё раз или нажми «Я повторила · взять».';
+    const correct = stage === 'thanks' ? alternatives.some((text) => /\bthank you\b/i.test(text)) :
+      alternatives.some((text) => matchesPhrase(text, fruit));
+    if (correct) advanceDialogue();
+    else speechStatus.textContent = 'Try again, or say the line out loud and use the button.';
   };
   listener.onerror = () => {
-    if (recognizer === listener) speechStatus.textContent = 'Можно повторить фразу вслух и взять фрукт кнопкой ниже.';
+    if (recognizer === listener) speechStatus.textContent = 'Say the line out loud and use the button.';
   };
   listener.onend = () => {
     if (recognizer !== listener) return;
@@ -205,7 +241,7 @@ function listenForFruit() {
   } catch {
     recognizer = null;
     say.disabled = false;
-    speechStatus.textContent = 'Можно повторить фразу вслух и взять фрукт кнопкой ниже.';
+    speechStatus.textContent = 'Say the line out loud and use the button.';
   }
 }
 
@@ -223,6 +259,10 @@ function move(key) {
 }
 
 function direction(key) {
+  if (x < rowExit) {
+    announce('Walk to the ROWS sign at the far right.');
+    return;
+  }
   if (key === 'ArrowUp') chooseZone(zoneIndex + 1);
   if (key === 'ArrowDown') chooseZone(zoneIndex - 1);
 }
@@ -263,8 +303,8 @@ look.addEventListener('click', (event) => {
 });
 byId('close-card').addEventListener('click', () => card.close());
 byId('hear-word').addEventListener('click', () => speak('word'));
-byId('hear-phrase').addEventListener('click', () => speak('phrase'));
-byId('take').addEventListener('click', takeFruit);
+byId('hear-phrase').addEventListener('click', () => speak(dialogueStage));
+byId('take').addEventListener('click', advanceDialogue);
 say.addEventListener('click', listenForFruit);
 card.addEventListener('close', () => {
   if (card.open) return;
@@ -278,7 +318,7 @@ byId('replay').addEventListener('click', () => {
   if (zoneIndex === 0) x = 128;
   else chooseZone(0);
   renderBasket();
-  zoneButtons[0].focus();
+  document.querySelector('[data-key="ArrowRight"]').focus();
 });
 
 function animate(now) {
