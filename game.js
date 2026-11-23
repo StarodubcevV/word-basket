@@ -110,7 +110,8 @@ function speak(variant) {
   const fruit = selectedFruit;
   stopVoice();
   const request = voiceRequest;
-  voice.src = variant === 'thanks' ? 'audio/thank-you.mp3' : `audio/${fruit.id}-${variant}.mp3`;
+  const file = variant === 'thanks' ? 'thank-you' : `${fruit.id}-${variant}`;
+  voice.src = `audio/${file}.mp3?v=speechkit-john`;
   voice.play().catch(() => {
     if (!card.open || request !== voiceRequest || !voice.paused) return;
     if ('speechSynthesis' in window) {
